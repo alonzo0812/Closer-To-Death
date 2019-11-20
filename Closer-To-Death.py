@@ -29,7 +29,7 @@ hitSound = ""
 clock = pygame.time.Clock()
 
 score = 0
-
+bulletnumber = 25
 class player(object):
     def __init__(self,x,y,width,height):
         self.x = x
@@ -206,7 +206,7 @@ class goal(object):
         pickupfont = pygame.font.SysFont("comicsans", 200)
         text = pickupfont.render('You Win!!', 1, (255,255,204))
         text2 = pickupfont.render('You Lose!!', 1, (255,0,0))
-        if score >= 80:
+        if score >= 60:
             while t <= 5000:
                 win.blit(text, (500 - (text.get_width()/2), 300 - (text.get_height()/2)))
                 pygame.display.update()
@@ -226,7 +226,9 @@ class goal(object):
 
 def redrawGameWindow():
     win.blit(bg, (0,0))
-    text = scorefont.render('Score: ' + str(score), 1, (0,0,0)) #text antialias color
+    text = scorefont.render('Score: ' + str(score), 1, (0,0,0))
+    bulletz = scorefont.render('Bullets: ' +str(bulletnumber),  1, (0,0,0))
+    win.blit(bulletz, (20, 40))#text antialias color
     win.blit(text, (20, 20))
     stage1.draw(win)
     points.draw(win)
@@ -343,7 +345,7 @@ while run:
 #MOVEMENT
     keys = pygame.key.get_pressed()
 
-    shootSpeed = 2 #Attack Speed
+    shootSpeed = 20 #Attack Speed
     if shootLoop > 0:
         shootLoop += 1
     if shootLoop > shootSpeed: #Attack Speed
@@ -352,15 +354,16 @@ while run:
 
     if keys[pygame.K_SPACE] and shootLoop == 0:
         #bulletSound.play()
-        if leo.left:
-            facing = -1
-        else:
-            facing = 1
-            
-        if len(bullets) < 60:
-            bullets.append(projectile(round(leo.x + leo.width //2), round(leo.y + leo.height//2), 6, (0,0,0), facing))
-
-        shootLoop = 1
+        if bulletnumber > 0:
+            if leo.left:
+                facing = -1
+            else:
+                facing = 1
+                
+            if len(bullets) < 60:
+                bullets.append(projectile(round(leo.x + leo.width //2), round(leo.y + leo.height//2), 6, (0,0,0), facing))
+            bulletnumber -= 1
+            shootLoop = 1
 
     if keys[pygame.K_a] and leo.x > leo.vel:
         leo.x -= leo.vel
