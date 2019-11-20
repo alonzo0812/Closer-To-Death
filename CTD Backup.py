@@ -1,10 +1,17 @@
 #Game made by John Leomarc Alonzo/Jolealz/Vessalius
-#Character Sprites - Justine Matthew Basa
+#Character Sprites - Amiel Manuel Ante, Justine Matthew Basa
 #Game Audio - Gibson Diwa
 import pygame
+import os
 pygame.init()
 
-win = pygame.display.set_mode((1000,600))
+info = pygame.display.Info()
+
+#Use this once you fix stuff
+width = info.current_w
+height = info.current_h
+
+win = pygame.display.set_mode((1000,600))#, pygame.FULLSCREEN)
 
 pygame.display.set_caption("Closer to Death")
 
@@ -15,8 +22,8 @@ bg = pygame.image.load('bg.jpg')
 bulletSound = ""#pygame.mixer.Sound('')
 hitSound = ""
 #bulletSound.play()
-music = pygame.mixer.music.load('music.mp3')
-pygame.mixer.music.play(-1)
+#music = pygame.mixer.music.load('music.mp3')
+#pygame.mixer.music.play(-1)
 
 
 clock = pygame.time.Clock()
@@ -122,8 +129,8 @@ class enemy(object):
                 self.walkCount += 1
 
             #Health Bar
-            pygame.draw.rect(win, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
-            pygame.draw.rect(win, (0,255,0), (self.hitbox[0], self.hitbox[1] - 20, 5 * self.health, 10))
+            pygame.draw.rect(win, (255,0,0), (self.hitbox[0] - 5, self.hitbox[1] - 20, 50, 10))
+            pygame.draw.rect(win, (0,255,0), (self.hitbox[0] - 5, self.hitbox[1] - 20, 5 * self.health, 10))
 
             self.hitbox = (self.x + 17, self.y + 2, 32, 57)#Change this
             #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
@@ -147,18 +154,77 @@ class enemy(object):
         if self.health > 1:
             self.health -= 1
         else:
+            global score
             self.visible = False
+            score += 20
         #print('Interaction detected.')
         pass
+
+
+class item(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.visible = True
         
+    def draw(self,win):
+        if self.visible:
+            pygame.draw.rect(win, (0,128,0), (self.x, self.y, self.width, self.height))
+    
+    def pickup(self):
+        global score
+        self.visible = False
+        score += 20
+        t = 0
+        pickupfont = pygame.font.SysFont("comicsans", 30)
+        text = pickupfont.render('+20', 1, (0,128,0))
+        while t <= 25:
+            win.blit(text, (140, 20))
+            pygame.display.update()
+            t += 1
+        
+        pass
+
+class goal(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.visible = True
+        
+    def draw(self,win):
+        if self.visible:
+            pygame.draw.rect(win, (255,255,204), (self.x, self.y, self.width, self.height))
+    
+    def pickup(self):
+        global score
+        self.visible = False
+        score += 20
+        t = 0
+        pickupfont = pygame.font.SysFont("comicsans", 200)
+        text = pickupfont.render('You Win!!', 1, (255,255,204))
+        while t <= 5000:
+            win.blit(text, (500 - (text.get_width()/2), 300 - (text.get_height()/2)))
+            pygame.display.update()
+            t += 1
+        
+        pass
+
+
 
 def redrawGameWindow():
     win.blit(bg, (0,0))
     text = scorefont.render('Score: ' + str(score), 1, (0,0,0)) #text antialias color
     win.blit(text, (20, 20))
+    stage1.draw(win)
+    points.draw(win)
     leo.draw(win)
     darkleo.draw(win)
-    darkerleo.draw(win)#Test
+    darkleo2.draw(win)
+    darkleo3.draw(win)#Test
     for bullet in bullets:
         bullet.draw(win)
     
@@ -170,15 +236,38 @@ scorefont = pygame.font.SysFont("comicsans", 30, True)
 
 
 #mainloop
+stage1 = goal(950, 0, 10, 580)
+points = item(100, 550, 25, 25)
 leo = player(0, 520, 64,64)
-darkleo = enemy(300, 520, 64, 64, 800)
-darkerleo = enemy(500, 520, 64, 64, 700)#Test
+darkleo = enemy(70, 520, 64, 64, 900)
+darkleo2 = enemy(300, 520, 64, 64, 700)
+darkleo3 = enemy(500, 520, 64, 64, 700)#Test
 shootLoop = 0
 bullets = []
 run = True
 while run:
     clock.tick(60)
+#----------------------------------------ITEM--------------------------------
 
+            
+    if points.visible == True:        
+        if leo.hitbox[0] + leo.hitbox[2] > points.x and leo.hitbox[0] + leo.hitbox[2] < points.x + points.width: # SOMETHING YOU DID YEHEY
+            if leo.hitbox[1] + leo.hitbox[3] > points.y and leo.hitbox[1] < points.y + points.height:
+                points.pickup()
+#---------------------------------------ITEM-------------------------------
+                #Change the game here at stage1.pivkup()
+#----------------------------------------STAGEGOAL--------------------------------
+
+            
+    if stage1.visible == True:        
+        if leo.hitbox[0] + leo.hitbox[2] > stage1.x and leo.hitbox[0] + leo.hitbox[2] < stage1.x + stage1.width: # SOMETHING YOU DID YEHEY
+            if leo.hitbox[1] + leo.hitbox[3] > stage1.y and leo.hitbox[1] < stage1.y + stage1.height:
+                stage1.pickup()
+                
+                
+                pygame.quit()
+                os.system('CTD2.py') #TO RUN THE NEXT STAGE WOOO
+#---------------------------------------STAGEGOAL-------------------------------
     
     
 #-----------------------------------------------------------------darkleo------------------------    
@@ -189,7 +278,6 @@ while run:
                     #hitSound.play()
                     darkleo.hit()
                     bullets.pop(bullets.index(bullet))
-                    score += 1
                 
         if bullet.x < 1000 and bullet.x > 0:
             bullet.x += bullet.vel
@@ -203,35 +291,55 @@ while run:
                 score -= 10
 #----------------------------------------------darkleo-----------------------------------------------
 
-#-----------------------------------------------------------------darkerleo------------------------    
+#-----------------------------------------------------------------darkleo2------------------------    
     for bullet in bullets:
-        if darkerleo.visible == True:
-            if bullet.y - bullet.radius < darkerleo.hitbox[1] + darkerleo.hitbox[3] and bullet.y + bullet.radius > darkerleo.hitbox[1]:
-                if bullet.x + bullet.radius > darkerleo.hitbox[0] and bullet.x - bullet.radius < darkerleo.hitbox[0] + darkerleo.hitbox[2]:
+        if darkleo2.visible == True:
+            if bullet.y - bullet.radius < darkleo2.hitbox[1] + darkleo2.hitbox[3] and bullet.y + bullet.radius > darkleo2.hitbox[1]:
+                if bullet.x + bullet.radius > darkleo2.hitbox[0] and bullet.x - bullet.radius < darkleo2.hitbox[0] + darkleo2.hitbox[2]:
                     #hitSound.play()
-                    darkerleo.hit()
+                    darkleo2.hit()
                     bullets.pop(bullets.index(bullet))
-                    score += 1
                 
         if bullet.x < 1000 and bullet.x > 0:
             bullet.x += bullet.vel
         else:
             bullets.pop(bullets.index(bullet))
             
-    if darkerleo.visible == True:        
-        if leo.hitbox[0] + leo.hitbox[2] > darkerleo.hitbox[0] and leo.hitbox[0] + leo.hitbox[2] < darkerleo.hitbox[0] + darkerleo.hitbox[2]: # SOMETHING YOU DID YEHEY
-            if leo.hitbox[1] + leo.hitbox[3] > darkerleo.hitbox[1] and leo.hitbox[1] < darkerleo.hitbox[1] + darkerleo.hitbox[3]:
+    if darkleo2.visible == True:        
+        if leo.hitbox[0] + leo.hitbox[2] > darkleo2.hitbox[0] and leo.hitbox[0] + leo.hitbox[2] < darkleo2.hitbox[0] + darkleo2.hitbox[2]: # SOMETHING YOU DID YEHEY
+            if leo.hitbox[1] + leo.hitbox[3] > darkleo2.hitbox[1] and leo.hitbox[1] < darkleo2.hitbox[1] + darkleo2.hitbox[3]:
                 leo.hit()
                 score -= 10
-#----------------------------------------------darkerleo-----------------------------------------------
+#----------------------------------------------darkleo2-----------------------------------------------
+
+#-----------------------------------------------------------------darkleo3------------------------    
+    for bullet in bullets:
+        if darkleo3.visible == True:
+            if bullet.y - bullet.radius < darkleo3.hitbox[1] + darkleo3.hitbox[3] and bullet.y + bullet.radius > darkleo3.hitbox[1]:
+                if bullet.x + bullet.radius > darkleo3.hitbox[0] and bullet.x - bullet.radius < darkleo3.hitbox[0] + darkleo3.hitbox[2]:
+                    #hitSound.play()
+                    darkleo3.hit()
+                    bullets.pop(bullets.index(bullet))
+                
+        if bullet.x < 1000 and bullet.x > 0:
+            bullet.x += bullet.vel
+        else:
+            bullets.pop(bullets.index(bullet))
+            
+    if darkleo3.visible == True:        
+        if leo.hitbox[0] + leo.hitbox[2] > darkleo3.hitbox[0] and leo.hitbox[0] + leo.hitbox[2] < darkleo3.hitbox[0] + darkleo3.hitbox[2]: # SOMETHING YOU DID YEHEY
+            if leo.hitbox[1] + leo.hitbox[3] > darkleo3.hitbox[1] and leo.hitbox[1] < darkleo3.hitbox[1] + darkleo3.hitbox[3]:
+                leo.hit()
+                score -= 10
+#----------------------------------------------darkleo3-----------------------------------------------
 
 #MOVEMENT
     keys = pygame.key.get_pressed()
 
-
+    shootSpeed = 2 #Attack Speed
     if shootLoop > 0:
         shootLoop += 1
-    if shootLoop > 13:
+    if shootLoop > shootSpeed: #Attack Speed
         shootLoop = 0
 
 
