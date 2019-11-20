@@ -202,14 +202,23 @@ class goal(object):
     def pickup(self):
         global score
         self.visible = False
-        score += 20
         t = 0
         pickupfont = pygame.font.SysFont("comicsans", 200)
         text = pickupfont.render('You Win!!', 1, (255,255,204))
-        while t <= 5000:
-            win.blit(text, (500 - (text.get_width()/2), 300 - (text.get_height()/2)))
-            pygame.display.update()
-            t += 1
+        text2 = pickupfont.render('You Lose!!', 1, (255,0,0))
+        if score >= 80:
+            while t <= 5000:
+                win.blit(text, (500 - (text.get_width()/2), 300 - (text.get_height()/2)))
+                pygame.display.update()
+                t += 1
+            pygame.quit()
+            os.system('CTD2.py')
+        else:
+            while t <= 5000:
+                win.blit(text2, (500 - (text.get_width()/2), 300 - (text.get_height()/2)))
+                pygame.display.update()
+                t += 1
+            pygame.quit()
         
         pass
 
@@ -264,9 +273,7 @@ while run:
             if leo.hitbox[1] + leo.hitbox[3] > stage1.y and leo.hitbox[1] < stage1.y + stage1.height:
                 stage1.pickup()
                 
-                
-                pygame.quit()
-                os.system('CTD2.py') #TO RUN THE NEXT STAGE WOOO
+                 #TO RUN THE NEXT STAGE WOOO
 #---------------------------------------STAGEGOAL-------------------------------
     
     
